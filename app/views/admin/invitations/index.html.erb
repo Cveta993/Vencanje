@@ -1,0 +1,125 @@
+<% content_for :title, "Pozivnice | Administracija venčanja" %>
+
+<header class="admin-page-header">
+  <div>
+    <p class="admin-eyebrow">Pregled gostiju</p>
+    <h1>Pozivnice i odgovori</h1>
+    <p class="admin-muted">Na jednom mestu pratite ko dolazi i kopirajte privatne linkove za goste.</p>
+  </div>
+  <div class="admin-page-actions">
+    <%= link_to "Izvezi CSV", admin_rsvps_export_path(format: :csv), class: "admin-button admin-button--secondary" %>
+    <%= link_to "Nova pozivnica", new_admin_invitation_path, class: "admin-button admin-button--primary" %>
+  </div>
+</header>
+
+<section class="summary-grid" aria-label="Ukupan pregled odgovora">
+  <article class="summary-card summary-card--wide">
+    <span class="summary-card__label">Dolaze gosti</span>
+    <strong><%= @summary[:adults] + @summary[:children] %></strong>
+    <small><%= @summary[:adults] %> odraslih · <%= @summary[:children] %> dece</small>
+  </article>
+  <article class="summary-card">
+    <span class="summary-card__label">Potvrdili</span>
+    <strong><%= @summary[:attending] %></strong>
+    <small>pozivnica</small>
+  </article>
+  <article class="summary-card">
+    <span class="summary-card__label">Odbili</span>
+    <strong><%= @summary[:declined] %></strong>
+    <small>pozivnica</small>
+  </article>
+  <article class="summary-card">
+    <span class="summary-card__label">Bez odgovora</span>
+    <strong><%= @summary[:pending] %></strong>
+    <small>od <%= @summary[:invitations] %> ukupno</small>
+  </article>
+</section>
+
+<%= form_with url: admin_invitations_path, method: :get, class: "filter-bar" do |form| %>
+  <div class="filter-bar__search">
+    <%= form.label :q, "Pretraži po imenu", class: "sr-only" %>
+    <%= form.search_field :q, value: params[:q], placeholder: "Pretraži po imenu…" %>
+  </div>
+  <div>
+    <%= form.label :status, "Status", class: "sr-only" %>
+    <%= form.select :status,
+      options_for_select([
+        ["Svi odgovori", ""],
+        ["Dolaze", "attending"],
+        ["Ne dolaze", "declined"],
+        ["Čeka se odgovor", "pending"]
+      ], params[:status]) %>
+  </div>
+  <%= form.submit "Prikaži", class: "admin-button admin-button--secondary" %>
+  <% if params[:q].present? || params[:status].present? %>
+    <%= link_to "Obriši filtere", admin_invitations_path, class: "admin-text-link" %>
+  <% end %>
+<% end %>
+
+<section class="invitation-list" aria-label="Lista pozivnica">
+  <% if @invitations.any? %>
+    <% @invitations.each do |invitation| %>
+      <% rsvp = invitation.rsvp %>
+      <% status = invitation_status(invitation) %>
+      <article class="invitation-card">
+        <header class="invitation-card__header">
+          <div>
+            <p class="invitation-card__kicker">Pozivnica</p>
+            <h2><%= link_to invitation_display_name(invitation), admin_invitation_path(invitation) %></h2>
+          </div>
+          <span class="status-badge status-badge--<%= status %>"><%= invitation_status_label(invitation) %></span>
+        </header>
+
+        <div class="invitation-card__content">
+          <div class="invitation-response">
+            <% if status == "attending" %>
+              <p class="response-count"><strong><%= rsvp.adult_count %></strong> odraslih · <strong><%= rsvp.child_count %></strong> dece</p>
+              <ul class="guest-list guest-list--compact">
+                <% rsvp.rsvp_guests.sort_by(&:position).each do |guest| %>
+                  <li>
+                    <span><%= guest.full_name %></span>
+                    <small><%= guest_type_label(guest) %></small>
+                  </li>
+                <% end %>
+              </ul>
+            <% elsif status == "declined" %>
+              <p class="admin-muted">Gosti su javili da neće prisustvovati.</p>
+            <% else %>
+              <p class="admin-muted">Odgovor još nije poslat.</p>
+            <% end %>
+
+            <% if rsvp&.message.present? %>
+              <blockquote class="guest-message"><%= rsvp.message %></blockquote>
+            <% end %>
+          </div>
+
+          <div class="invitation-link-panel" data-controller="clipboard">
+            <label for="invitation-link-<%= invitation.id %>">Privatni link</label>
+            <div class="copy-field">
+              <input id="invitation-link-<%= invitation.id %>" type="text" readonly value="<%= invitation_url(invitation.access_token) %>" data-clipboard-target="source">
+              <button type="button" class="admin-button admin-button--copy" data-clipboard-target="button" data-action="clipboard#copy">Kopiraj</button>
+            </div>
+            <% if invitation.note.present? %>
+              <p class="invitation-note"><strong>Napomena:</strong> <%= invitation.note %></p>
+            <% end %>
+          </div>
+        </div>
+
+        <footer class="invitation-card__actions">
+          <%= link_to "Detalji", admin_invitation_path(invitation), class: "admin-text-link" %>
+          <%= link_to "Izmeni pozivnicu", edit_admin_invitation_path(invitation), class: "admin-text-link" %>
+          <%= link_to status == "pending" ? "Unesi odgovor" : "Izmeni odgovor",
+            edit_admin_invitation_rsvp_path(invitation),
+            class: "admin-text-link" %>
+        </footer>
+      </article>
+    <% end %>
+  <% else %>
+    <div class="empty-state">
+      <div class="empty-state__icon" aria-hidden="true">✦</div>
+      <h2>Nema pronađenih pozivnica</h2>
+      <p><%= params[:q].present? || params[:status].present? ? "Promenite filtere i pokušajte ponovo." : "Napravite prvu pozivnicu i pošaljite privatni link gostima." %></p>
+      <%= link_to "Napravi pozivnicu", new_admin_invitation_path, class: "admin-button admin-button--primary" %>
+    </div>
+  <% end %>
+</section>

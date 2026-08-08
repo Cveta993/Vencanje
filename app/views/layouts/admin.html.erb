@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="sr">
+  <head>
+    <title><%= content_for(:title) || "Administracija venčanja" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="robots" content="noindex,nofollow,noarchive">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "admin", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="admin-body">
+    <% if current_admin_user %>
+      <header class="admin-header">
+        <div class="admin-shell admin-header__inner">
+          <%= link_to admin_root_path, class: "admin-brand", aria: { label: "Početna strana administracije" } do %>
+            <span class="admin-brand__mark" aria-hidden="true"><%= wedding_config.dig(:couple, :monogram) %></span>
+            <span>
+              <strong>Naše venčanje</strong>
+              <small>Administracija</small>
+            </span>
+          <% end %>
+
+          <nav class="admin-nav" aria-label="Administracija">
+            <%= link_to "Pozivnice", admin_invitations_path %>
+            <%= link_to "Nova pozivnica", new_admin_invitation_path %>
+            <%= button_to "Odjavi se", admin_logout_path, method: :delete, class: "admin-nav__logout" %>
+          </nav>
+        </div>
+      </header>
+    <% end %>
+
+    <main class="admin-shell admin-main<%= " admin-main--login" unless current_admin_user %>">
+      <% flash.each do |type, message| %>
+        <div class="admin-flash admin-flash--<%= type %>" role="status"><%= message %></div>
+      <% end %>
+
+      <%= yield %>
+    </main>
+  </body>
+</html>

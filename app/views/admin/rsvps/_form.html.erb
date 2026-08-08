@@ -1,0 +1,155 @@
+<% attending = @rsvp.attendance == "attending" %>
+<% adult_count = [[@adult_count.to_i, 1].max, RsvpSubmission::MAX_GUESTS].min %>
+<% child_count = [[@child_count.to_i, 0].max, RsvpSubmission::MAX_GUESTS - 1].min %>
+<% adult_values = Array.new(adult_count) { |index| @adult_names[index].to_s } %>
+<% child_values = Array.new(child_count) { |index| @child_names[index].to_s } %>
+
+<%= form_with model: @rsvp,
+  url: admin_invitation_rsvp_path(@invitation),
+  method: @rsvp.persisted? ? :patch : :post,
+  class: "admin-form admin-rsvp-form",
+  data: {
+    controller: "guest-form",
+    guest_form_max_guests_value: RsvpSubmission::MAX_GUESTS,
+    guest_form_default_adult_name_value: invitation_display_name(@invitation)
+  } do |form| %>
+
+  <% if @rsvp.errors.any? %>
+    <div class="form-errors" role="alert">
+      <h2>Proverite unete podatke:</h2>
+      <ul>
+        <% @rsvp.errors.full_messages.uniq.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <fieldset class="admin-choice">
+    <legend>Da li dolaze?</legend>
+    <div class="admin-choice__options">
+      <label class="admin-choice-card">
+        <%= form.radio_button :attendance,
+          "attending",
+          required: true,
+          data: { guest_form_target: "status", action: "guest-form#attendanceChanged" } %>
+        <span>
+          <strong>Dolaze</strong>
+          <small>Unesite imena svih gostiju</small>
+        </span>
+      </label>
+
+      <label class="admin-choice-card">
+        <%= form.radio_button :attendance,
+          "declined",
+          required: true,
+          data: { guest_form_target: "status", action: "guest-form#attendanceChanged" } %>
+        <span>
+          <strong>Ne dolaze</strong>
+          <small>Lista gostiju će biti prazna</small>
+        </span>
+      </label>
+    </div>
+  </fieldset>
+
+  <div class="admin-guest-details" data-guest-form-target="attendingFields" <%= "hidden" unless attending %>>
+    <div class="form-grid">
+      <div class="admin-field">
+        <%= label_tag "rsvp_adult_count", "Broj odraslih" %>
+        <%= select_tag "rsvp[adult_count]",
+          options_for_select((1..RsvpSubmission::MAX_GUESTS).to_a, adult_count),
+          id: "rsvp_adult_count",
+          disabled: !attending,
+          data: {
+            guest_form_target: "adultCount",
+            action: "guest-form#adultCountChanged"
+          } %>
+      </div>
+
+      <div class="admin-field">
+        <%= label_tag "rsvp_child_count", "Deca mlađa od 10 godina" %>
+        <%= select_tag "rsvp[child_count]",
+          options_for_select((0...RsvpSubmission::MAX_GUESTS).to_a, child_count),
+          id: "rsvp_child_count",
+          disabled: !attending,
+          data: {
+            guest_form_target: "childCount",
+            action: "guest-form#childCountChanged"
+          } %>
+      </div>
+    </div>
+
+    <section class="admin-guest-section">
+      <header>
+        <h2>Odrasli gosti</h2>
+        <p>Ime i prezime svake osobe.</p>
+      </header>
+      <div class="admin-guest-name-list" data-guest-form-target="adultNames" aria-live="polite">
+        <% adult_values.each_with_index do |name, index| %>
+          <div class="admin-field" data-guest-name-row>
+            <%= label_tag "rsvp_adult_name_#{index}", "Odrasla osoba #{index + 1}" %>
+            <%= text_field_tag "rsvp[adult_names][]",
+              name,
+              id: "rsvp_adult_name_#{index}",
+              required: attending,
+              disabled: !attending,
+              maxlength: RsvpSubmission::MAX_NAME_LENGTH,
+              autocomplete: "off",
+              placeholder: "Ime i prezime" %>
+          </div>
+        <% end %>
+      </div>
+    </section>
+
+    <section class="admin-guest-section" data-guest-form-target="childSection" <%= "hidden" if child_count.zero? %>>
+      <header>
+        <h2>Deca mlađa od 10 godina</h2>
+        <p>Ime i prezime svakog deteta.</p>
+      </header>
+      <div class="admin-guest-name-list" data-guest-form-target="childNames" aria-live="polite">
+        <% child_values.each_with_index do |name, index| %>
+          <div class="admin-field" data-guest-name-row>
+            <%= label_tag "rsvp_child_name_#{index}", "Dete #{index + 1}" %>
+            <%= text_field_tag "rsvp[child_names][]",
+              name,
+              id: "rsvp_child_name_#{index}",
+              required: attending,
+              disabled: !attending,
+              maxlength: RsvpSubmission::MAX_NAME_LENGTH,
+              autocomplete: "off",
+              placeholder: "Ime i prezime" %>
+          </div>
+        <% end %>
+      </div>
+    </section>
+  </div>
+
+  <template data-guest-form-target="adultTemplate">
+    <div class="admin-field" data-guest-name-row>
+      <label>Odrasla osoba</label>
+      <input type="text" maxlength="<%= RsvpSubmission::MAX_NAME_LENGTH %>" autocomplete="off" placeholder="Ime i prezime">
+    </div>
+  </template>
+
+  <template data-guest-form-target="childTemplate">
+    <div class="admin-field" data-guest-name-row>
+      <label>Dete</label>
+      <input type="text" maxlength="<%= RsvpSubmission::MAX_NAME_LENGTH %>" autocomplete="off" placeholder="Ime i prezime">
+    </div>
+  </template>
+
+  <div class="admin-field">
+    <%= form.label :message, "Poruka koju je gost poslao (opciono)" %>
+    <%= form.text_area :message,
+      rows: 4,
+      maxlength: RsvpSubmission::MAX_MESSAGE_LENGTH,
+      placeholder: "Unesite poruku ako ste je dobili…" %>
+  </div>
+
+  <p class="admin-form-note">Gost kasnije može da izmeni ovaj odgovor preko svog privatnog linka.</p>
+
+  <div class="form-actions">
+    <%= link_to "Otkaži", admin_invitation_path(@invitation), class: "admin-button admin-button--secondary" %>
+    <%= form.submit "Sačuvaj odgovor", class: "admin-button admin-button--primary" %>
+  </div>
+<% end %>

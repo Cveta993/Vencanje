@@ -1,0 +1,13 @@
+<% content_for :title, "Nova pozivnica | Administracija venčanja" %>
+
+<header class="admin-page-header admin-page-header--compact">
+  <div>
+    <p class="admin-eyebrow">Novi privatni link</p>
+    <h1>Nova pozivnica</h1>
+    <p class="admin-muted">Unesite ime osobe ili porodice kojoj šaljete pozivnicu.</p>
+  </div>
+</header>
+
+<section class="admin-panel admin-panel--form">
+  <%= render "form", invitation: @invitation %>
+</section>

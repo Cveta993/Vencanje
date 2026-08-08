@@ -1,0 +1,29 @@
+<% content_for :title, "Prijava | Administracija venčanja" %>
+
+<section class="login-card">
+  <div class="login-card__monogram" aria-hidden="true"><%= wedding_config.dig(:couple, :monogram) %></div>
+  <p class="admin-eyebrow">Privatna administracija</p>
+  <h1>Dobro došli</h1>
+  <p class="admin-muted">Prijavite se da pregledate odgovore gostiju i napravite nove pozivnice.</p>
+
+  <%= form_with url: admin_login_path, class: "admin-form login-form" do |form| %>
+    <div class="admin-field">
+      <%= form.label :email_address, "Email adresa" %>
+      <%= form.email_field :email_address,
+        value: params[:email_address],
+        required: true,
+        autofocus: true,
+        autocomplete: "username",
+        placeholder: "ime@primer.com" %>
+    </div>
+
+    <div class="admin-field">
+      <%= form.label :password, "Lozinka" %>
+      <%= form.password_field :password,
+        required: true,
+        autocomplete: "current-password" %>
+    </div>
+
+    <%= form.submit "Prijavi se", class: "admin-button admin-button--primary admin-button--wide" %>
+  <% end %>
+</section>

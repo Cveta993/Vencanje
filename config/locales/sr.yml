@@ -1,0 +1,31 @@
+sr:
+  errors:
+    format: "%{attribute} %{message}"
+    messages:
+      blank: "ne može biti prazno"
+      invalid: "nije ispravno"
+      taken: "je već zauzeto"
+      too_long: "je predugačko (najviše %{count} znakova)"
+      too_short: "je prekratko (najmanje %{count} znakova)"
+      confirmation: "se ne poklapa"
+  activerecord:
+    models:
+      invitation: "Pozivnica"
+      rsvp: "Odgovor"
+      rsvp_guest: "Gost"
+      user: "Administrator"
+    attributes:
+      invitation:
+        first_name: "Ime"
+        last_name: "Prezime"
+        note: "Napomena"
+      rsvp:
+        attendance: "Dolazak"
+        message: "Poruka"
+        rsvp_guests: "Gosti"
+      rsvp_guest:
+        full_name: "Ime i prezime gosta"
+        guest_type: "Vrsta gosta"
+      user:
+        email_address: "Email"
+        password: "Lozinka"

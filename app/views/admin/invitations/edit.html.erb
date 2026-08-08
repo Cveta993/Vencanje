@@ -1,0 +1,13 @@
+<% content_for :title, "Izmena pozivnice | Administracija venčanja" %>
+
+<header class="admin-page-header admin-page-header--compact">
+  <div>
+    <p class="admin-eyebrow">Pozivnica za</p>
+    <h1><%= invitation_display_name(@invitation) %></h1>
+    <p class="admin-muted">Promena imena ili napomene ne menja privatni link.</p>
+  </div>
+</header>
+
+<section class="admin-panel admin-panel--form">
+  <%= render "form", invitation: @invitation %>
+</section>

@@ -1,0 +1,114 @@
+<% content_for :title, "Pozivnica za #{invitation_recipient_name} · #{wedding_couple_names}" %>
+<% content_for :meta_description, "Pozivnica za venčanje — #{wedding_couple_names}." %>
+<% content_for :head do %>
+  <meta name="referrer" content="no-referrer">
+  <%= tag.link rel: "preload", href: asset_path(wedding_image(:hero)), as: "image" %>
+  <%= tag.link rel: "preload", href: asset_path(wedding_image(:schedule)), as: "image" %>
+<% end %>
+
+<main class="invitation-page" data-controller="parallax">
+  <nav class="invitation-nav" aria-label="Navigacija pozivnice">
+    <a class="invitation-nav__brand" href="#top"><%= wedding_couple_names %></a>
+    <div class="invitation-nav__links">
+      <a href="#top">Početak</a>
+      <a href="#plan">Plan</a>
+      <a href="#rsvp">Potvrda</a>
+      <a href="#gallery">Galerija</a>
+    </div>
+  </nav>
+
+  <% if notice.present? %>
+    <div class="invitation-toast" role="status">
+      <span aria-hidden="true">✓</span>
+      <%= notice %>
+    </div>
+  <% end %>
+
+  <section class="hero-panel story-panel" id="top" aria-labelledby="invitation-title">
+    <div class="hero-panel__photo parallax-layer" data-parallax-target="layer" data-parallax-speed="0.40" aria-hidden="true">
+      <%= image_tag wedding_image(:hero), class: "story-image story-image--cover", alt: "" %>
+    </div>
+    <div class="hero-panel__shade" aria-hidden="true"></div>
+
+    <div class="hero-panel__content">
+      <p class="eyebrow eyebrow--light">Sa radošću vas pozivamo</p>
+      <h1 id="invitation-title"><%= wedding_couple_names %></h1>
+      <p class="hero-panel__date"><%= wedding_config.dig(:date, :display) %></p>
+      <p class="hero-panel__invited">
+        <span>Posebno za</span>
+        <strong><%= invitation_recipient_name %></strong>
+      </p>
+      <a class="scroll-cue" href="#plan">
+        <span>Detalji venčanja</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+      </a>
+    </div>
+  </section>
+
+  <section class="schedule-panel story-panel" id="plan" aria-labelledby="schedule-title">
+    <div class="schedule-panel__photo parallax-layer" data-parallax-target="layer" data-parallax-speed="0.42" data-parallax-viewport-anchor="0" aria-hidden="true">
+      <%= image_tag wedding_image(:schedule), class: "story-image story-image--cover", alt: "" %>
+    </div>
+    <div class="schedule-panel__shade" aria-hidden="true"></div>
+
+    <div class="schedule-panel__content">
+      <header class="section-heading section-heading--light">
+        <p class="eyebrow eyebrow--light">Jedan dan · tri lepa trenutka</p>
+        <h2 id="schedule-title">Plan venčanja</h2>
+        <p>Biće nam posebno drago da ovaj dan provedemo zajedno.</p>
+      </header>
+
+      <ol class="event-list">
+        <% wedding_events.each do |event| %>
+          <li class="event-card">
+            <h3><%= event[:title] %></h3>
+            <p class="event-card__venue"><%= event[:venue] %></p>
+            <% if event[:map_url].present? %>
+              <%= link_to event[:address], event[:map_url], class: "event-card__address", target: "_blank", rel: "noopener" %>
+            <% elsif event[:address].present? %>
+              <p class="event-card__address"><%= event[:address] %></p>
+            <% end %>
+            <time class="event-card__time"><%= event[:time] %></time>
+          </li>
+        <% end %>
+      </ol>
+    </div>
+  </section>
+
+  <section class="rsvp-panel story-panel" aria-labelledby="rsvp-title">
+    <div class="rsvp-panel__photo parallax-layer" data-parallax-target="layer" data-parallax-speed="0.38" data-parallax-viewport-anchor="0.333333" aria-hidden="true">
+      <%= image_tag wedding_image(:rsvp), class: "story-image story-image--cover", alt: "" %>
+    </div>
+    <div class="rsvp-panel__photo-shade" aria-hidden="true"></div>
+
+    <div class="rsvp-panel__form-wrap" id="rsvp">
+      <aside class="rsvp-deadline" aria-label="Rok za potvrdu dolaska">
+        <span>Molimo vas da potvrdite dolazak</span>
+        <strong>najkasnije do <%= wedding_config[:response_deadline] %></strong>
+        <small><%= wedding_config[:response_deadline_note] %></small>
+      </aside>
+
+      <header class="section-heading">
+        <p class="eyebrow">Potvrdite prisustvo</p>
+        <h2 id="rsvp-title">Dolazite li?</h2>
+        <p>
+          Za svakog gosta unesite ime i prezime kako bismo pripremili raspored sedenja.
+        </p>
+      </header>
+
+      <% if @rsvp.persisted? && @rsvp.submitted_at.present? %>
+        <div class="saved-response">
+          <span class="saved-response__icon" aria-hidden="true">✓</span>
+          <p>
+            <strong>Vaš odgovor je sačuvan.</strong>
+            Možete ga izmeniti i ponovo poslati kad god želite.
+          </p>
+        </div>
+      <% end %>
+
+      <%= render "invitations/rsvp_form" %>
+    </div>
+
+    <span class="gallery-anchor" id="gallery" aria-hidden="true"></span>
+  </section>
+</main>

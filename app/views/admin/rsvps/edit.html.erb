@@ -1,0 +1,13 @@
+<% content_for :title, "Odgovor za #{invitation_display_name(@invitation)} | Administracija venčanja" %>
+
+<header class="admin-page-header admin-page-header--compact">
+  <div>
+    <p class="admin-eyebrow"><%= @rsvp.persisted? ? "Izmena odgovora" : "Ručni unos odgovora" %></p>
+    <h1><%= invitation_display_name(@invitation) %></h1>
+    <p class="admin-muted">Unesite odgovor koji ste dobili telefonom, porukom ili lično.</p>
+  </div>
+</header>
+
+<section class="admin-panel admin-panel--form">
+  <%= render "form" %>
+</section>

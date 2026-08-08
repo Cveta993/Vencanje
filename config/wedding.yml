@@ -1,0 +1,41 @@
+default: &default
+  couple:
+    names: "Aleksa & Valentina"
+    monogram: "A · V"
+  date:
+    display: "29.05.2027."
+    year: "2027"
+  response_deadline: "15.05.2027."
+  response_deadline_note: "Dve nedelje pre venčanja"
+  images:
+    hero: "wedding/hero-hug.jpg"
+    schedule: "wedding/schedule-bled.jpeg"
+    rsvp: "wedding/rsvp-childhood.jpg"
+  events:
+    - number: "01"
+      title: "Crkveno venčanje"
+      time: "16:00"
+      venue: "Zemun Polje"
+      address:
+      map_url:
+    - number: "02"
+      title: "Skup svatova"
+      time: "17:00"
+      venue: "U restoranu"
+      address:
+      map_url:
+    - number: "03"
+      title: "Opštinsko venčanje"
+      time: "18:00"
+      venue: "U restoranu"
+      address:
+      map_url:
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+
+production:
+  <<: *default

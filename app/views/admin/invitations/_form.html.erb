@@ -1,0 +1,34 @@
+<%= form_with model: [:admin, invitation], class: "admin-form invitation-form" do |form| %>
+  <% if invitation.errors.any? %>
+    <div class="form-errors" role="alert">
+      <h2>Proverite unete podatke:</h2>
+      <ul>
+        <% invitation.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="form-grid">
+    <div class="admin-field">
+      <%= form.label :first_name, "Ime" %>
+      <%= form.text_field :first_name, required: true, autofocus: true, autocomplete: "off" %>
+    </div>
+    <div class="admin-field">
+      <%= form.label :last_name, "Prezime" %>
+      <%= form.text_field :last_name, required: true, autocomplete: "off" %>
+    </div>
+  </div>
+
+  <div class="admin-field">
+    <%= form.label :note, "Interna napomena" %>
+    <%= form.text_area :note, rows: 4, placeholder: "Na primer: porodica, kontakt telefon ili posebna napomena…" %>
+    <small>Ovu napomenu gosti ne vide.</small>
+  </div>
+
+  <div class="form-actions">
+    <%= link_to "Otkaži", invitation.persisted? ? admin_invitation_path(invitation) : admin_invitations_path, class: "admin-button admin-button--secondary" %>
+    <%= form.submit invitation.persisted? ? "Sačuvaj izmene" : "Napravi pozivnicu", class: "admin-button admin-button--primary" %>
+  </div>
+<% end %>

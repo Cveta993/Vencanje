@@ -1,0 +1,121 @@
+<% content_for :title, "#{invitation_display_name(@invitation)} | Administracija venčanja" %>
+<% rsvp = @invitation.rsvp %>
+<% status = invitation_status(@invitation) %>
+
+<header class="admin-page-header">
+  <div>
+    <p class="admin-eyebrow">Pozivnica za</p>
+    <h1><%= invitation_display_name(@invitation) %></h1>
+    <span class="status-badge status-badge--<%= status %>"><%= invitation_status_label(@invitation) %></span>
+  </div>
+  <div class="admin-page-actions">
+    <%= link_to "Nazad", admin_invitations_path, class: "admin-button admin-button--secondary" %>
+    <%= link_to "Izmeni pozivnicu", edit_admin_invitation_path(@invitation), class: "admin-button admin-button--primary" %>
+  </div>
+</header>
+
+<div class="detail-grid">
+  <section class="admin-panel">
+    <div class="admin-panel__header">
+      <div>
+        <p class="admin-eyebrow">Link za slanje</p>
+        <h2>Privatna pozivnica</h2>
+      </div>
+    </div>
+
+    <div class="invitation-link-panel invitation-link-panel--large" data-controller="clipboard">
+      <label for="invitation-link">Pun link pozivnice</label>
+      <div class="copy-field">
+        <input id="invitation-link" type="text" readonly value="<%= invitation_url(@invitation.access_token) %>" data-clipboard-target="source">
+        <button type="button" class="admin-button admin-button--copy" data-clipboard-target="button" data-action="clipboard#copy">Kopiraj link</button>
+      </div>
+      <%= link_to "Otvori kao gost ↗", invitation_path(@invitation.access_token), target: "_blank", rel: "noopener", class: "admin-text-link" %>
+    </div>
+
+    <% if @invitation.note.present? %>
+      <div class="detail-note">
+        <span>Interna napomena</span>
+        <p><%= @invitation.note %></p>
+      </div>
+    <% end %>
+
+    <div class="danger-zone">
+      <div>
+        <strong>Kreiraj novi link</strong>
+        <p>Koristite samo ako je postojeći link poslat pogrešnoj osobi.</p>
+      </div>
+      <%= button_to "Promeni link",
+        regenerate_link_admin_invitation_path(@invitation),
+        method: :post,
+        class: "admin-button admin-button--danger",
+        form: { data: { turbo_confirm: "Da li ste sigurni? Stari link će odmah prestati da radi i gostu morate poslati novi." } } %>
+    </div>
+  </section>
+
+  <section class="admin-panel">
+    <div class="admin-panel__header">
+      <div>
+        <p class="admin-eyebrow">RSVP odgovor</p>
+        <h2><%= invitation_status_label(@invitation) %></h2>
+      </div>
+      <div class="admin-panel__actions">
+        <% if rsvp&.submitted_at %>
+          <time datetime="<%= rsvp.submitted_at.iso8601 %>"><%= l(rsvp.submitted_at, format: "%d.%m.%Y. u %H:%M") %></time>
+        <% end %>
+        <%= link_to(status == "pending" ? "Unesi odgovor" : "Izmeni odgovor",
+          edit_admin_invitation_rsvp_path(@invitation),
+          class: "admin-button #{status == "pending" ? "admin-button--primary" : "admin-button--secondary"}") %>
+      </div>
+    </div>
+
+    <% if status == "attending" %>
+      <div class="response-totals">
+        <span><strong><%= rsvp.adult_count %></strong> odraslih</span>
+        <span><strong><%= rsvp.child_count %></strong> dece mlađe od 10 godina</span>
+      </div>
+
+      <ul class="guest-list">
+        <% rsvp.rsvp_guests.sort_by(&:position).each do |guest| %>
+          <li>
+            <span><%= guest.full_name %></span>
+            <small><%= guest_type_label(guest) %></small>
+          </li>
+        <% end %>
+      </ul>
+    <% elsif status == "declined" %>
+      <div class="response-empty response-empty--declined">
+        <strong>Neće prisustvovati</strong>
+        <p>Gost je poslao odgovor, ali neće doći na venčanje.</p>
+      </div>
+    <% else %>
+      <div class="response-empty">
+        <strong>Odgovor još nije poslat</strong>
+        <p>Kada gost popuni upitnik, imena svih prijavljenih osoba pojaviće se ovde.</p>
+      </div>
+    <% end %>
+
+    <% if rsvp&.message.present? %>
+      <div class="detail-message">
+        <span>Poruka gostiju</span>
+        <blockquote><%= rsvp.message %></blockquote>
+      </div>
+    <% end %>
+  </section>
+</div>
+
+<section class="admin-delete-panel" aria-labelledby="delete-invitation-title">
+  <div>
+    <p class="admin-eyebrow">Brisanje</p>
+    <h2 id="delete-invitation-title">Obriši ovu pozivnicu</h2>
+    <p>Privatni link, RSVP odgovor i sva imena gostiju biće trajno obrisani.</p>
+  </div>
+  <%= button_to "Obriši pozivnicu",
+    admin_invitation_path(@invitation),
+    method: :delete,
+    class: "admin-button admin-button--danger",
+    form: {
+      data: {
+        turbo_confirm: "Obriši pozivnicu za #{invitation_display_name(@invitation)}? Privatni link, odgovor i sva imena gostiju biće trajno obrisani."
+      }
+    } %>
+</section>

@@ -1,0 +1,19 @@
+<% content_for :title, "Privatna pozivnica" %>
+<% content_for :meta_description, "Privatna pozivnica za venčanje." %>
+
+<main class="welcome-page">
+  <div class="welcome-page__glow welcome-page__glow--one" aria-hidden="true"></div>
+  <div class="welcome-page__glow welcome-page__glow--two" aria-hidden="true"></div>
+
+  <section class="welcome-card" aria-labelledby="welcome-title">
+    <p class="welcome-card__monogram" aria-hidden="true"><%= wedding_config.dig(:couple, :monogram) %></p>
+    <p class="eyebrow">Privatna pozivnica</p>
+    <h1 id="welcome-title">Dobro nam došli</h1>
+    <p>
+      Ova stranica se otvara preko ličnog linka koji ste dobili uz pozivnicu.
+      Otvorite taj link da vidite detalje venčanja i potvrdite dolazak.
+    </p>
+    <div class="welcome-card__rule" aria-hidden="true"><span>✦</span></div>
+    <p class="welcome-card__help">Ako link ne radi, javite se mladencima.</p>
+  </section>
+</main>
